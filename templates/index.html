@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AUTODS &mdash; Autonomous Data Scientist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" as="script">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="rig">
+
+  <!-- ============ SIDE RAIL : pipeline stepper ============ -->
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="rail-brand-mark">◈</span>
+      <div>
+        <div class="rail-brand-title">AUTODS</div>
+        <div class="rail-brand-sub">autonomous data scientist</div>
+      </div>
+    </div>
+
+    <ol class="stages" id="stageList">
+      <li class="stage" data-stage="upload">
+        <span class="stage-node"><span class="stage-dot"></span></span>
+        <span class="stage-label">
+          <span class="stage-name">Ingest</span>
+          <span class="stage-desc">load dataset</span>
+        </span>
+      </li>
+      <li class="stage" data-stage="clean">
+        <span class="stage-node"><span class="stage-dot"></span></span>
+        <span class="stage-label">
+          <span class="stage-name">Clean</span>
+          <span class="stage-desc">fix &amp; impute</span>
+        </span>
+      </li>
+      <li class="stage" data-stage="eda">
+        <span class="stage-node"><span class="stage-dot"></span></span>
+        <span class="stage-label">
+          <span class="stage-name">Explore</span>
+          <span class="stage-desc">EDA</span>
+        </span>
+      </li>
+      <li class="stage" data-stage="features">
+        <span class="stage-node"><span class="stage-dot"></span></span>
+        <span class="stage-label">
+          <span class="stage-name">Select</span>
+          <span class="stage-desc">feature ranking</span>
+        </span>
+      </li>
+      <li class="stage" data-stage="train">
+        <span class="stage-node"><span class="stage-dot"></span></span>
+        <span class="stage-label">
+          <span class="stage-name">Train</span>
+          <span class="stage-desc">model race</span>
+        </span>
+      </li>
+      <li class="stage" data-stage="explain">
+        <span class="stage-node"><span class="stage-dot"></span></span>
+        <span class="stage-label">
+          <span class="stage-name">Explain</span>
+          <span class="stage-desc">why it works</span>
+        </span>
+      </li>
+      <li class="stage" data-stage="predict">
+        <span class="stage-node"><span class="stage-dot"></span></span>
+        <span class="stage-label">
+          <span class="stage-name">Predict</span>
+          <span class="stage-desc">try it live</span>
+        </span>
+      </li>
+      <li class="stage" data-stage="dashboard">
+        <span class="stage-node"><span class="stage-dot"></span></span>
+        <span class="stage-label">
+          <span class="stage-name">Dashboard</span>
+          <span class="stage-desc">full readout</span>
+        </span>
+      </li>
+    </ol>
+
+    <button class="btn btn-run" id="runAllBtn">Run full pipeline ▸</button>
+    <button class="btn btn-ghost" id="resetBtn">Reset session</button>
+  </aside>
+
+  <!-- ============ MAIN : stage content ============ -->
+  <main class="stage-view">
+
+    <header class="topbar">
+      <div class="topbar-status" id="topStatus">
+        <span class="pulse"></span> idle &mdash; awaiting dataset
+      </div>
+      <div class="topbar-meta" id="topMeta"></div>
+    </header>
+
+    <!-- ---------- UPLOAD ---------- -->
+    <section class="panel" data-panel="upload">
+      <h1 class="panel-title">01 / Ingest</h1>
+      <p class="panel-sub">Bring your own CSV, or load a bundled sample to see the pipeline run end to end.</p>
+
+      <div class="upload-row">
+        <label class="dropzone" id="dropzone">
+          <input type="file" id="fileInput" accept=".csv" hidden>
+          <span class="dropzone-icon">⇪</span>
+          <span class="dropzone-text">Drop a CSV here, or click to browse</span>
+        </label>
+
+        <div class="sample-picker">
+          <div class="sample-picker-label">or load a sample dataset</div>
+          <div class="sample-buttons">
+            <button class="chip" data-sample="iris">Iris <small>classification</small></button>
+            <button class="chip" data-sample="wine">Wine <small>classification</small></button>
+            <button class="chip" data-sample="diabetes">Diabetes <small>regression</small></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="uploadSummary" class="card-grid hidden"></div>
+
+      <div class="table-toolbar hidden" id="tableToolbar">
+        <span id="tableCaption" class="table-caption"></span>
+        <button class="btn btn-ghost btn-small" id="toggleFullDataBtn">View full dataset</button>
+      </div>
+      <div id="previewTableWrap" class="table-wrap hidden"></div>
+      <div id="fullTableWrap" class="table-wrap table-wrap-scroll hidden"></div>
+    </section>
+
+    <!-- ---------- CLEAN ---------- -->
+    <section class="panel" data-panel="clean">
+      <h1 class="panel-title">02 / Clean</h1>
+      <p class="panel-sub">Duplicates, empty columns, identifiers, and missing values are handled automatically.</p>
+      <button class="btn btn-stage" data-action="clean">Run cleaning</button>
+      <div id="cleanReport" class="log-box hidden"></div>
+      <div id="cleanShapes" class="card-grid hidden"></div>
+      <div class="table-toolbar hidden" id="cleanTableToolbar">
+        <span class="table-caption">Cleaned dataset</span>
+        <div class="toolbar-actions">
+          <button class="btn btn-ghost btn-small" id="toggleCleanFullDataBtn">View full dataset</button>
+          <button class="btn btn-ghost btn-small" id="downloadCleanedBtn">⇩ Download CSV</button>
+        </div>
+      </div>
+      <div id="cleanFullTableWrap" class="table-wrap table-wrap-scroll hidden"></div>
+    </section>
+
+    <!-- ---------- EDA ---------- -->
+    <section class="panel" data-panel="eda">
+      <h1 class="panel-title">03 / Explore</h1>
+      <p class="panel-sub">Distributions, correlations, and category breakdowns computed across the cleaned data.</p>
+      <button class="btn btn-stage" data-action="eda">Run EDA</button>
+      <div id="edaContent" class="hidden">
+        <div class="grid-2">
+          <div class="scope-card">
+            <div class="scope-card-head"><span>Correlation matrix</span></div>
+            <div id="corrHeatmap"></div>
+          </div>
+          <div class="scope-card" id="histPicker">
+            <div class="scope-card-head">
+              <span>Distribution</span>
+              <select id="histSelect"></select>
+            </div>
+            <canvas id="histChart"></canvas>
+          </div>
+        </div>
+        <div id="catCharts" class="grid-3"></div>
+
+        <div class="scope-card" id="rangeCard" style="margin-top:18px;">
+          <div class="scope-card-head"><span>Feature ranges (min · mean · max)</span></div>
+          <div id="rangeViz" class="range-viz"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- FEATURES ---------- -->
+    <section class="panel" data-panel="features">
+      <h1 class="panel-title">04 / Select</h1>
+      <p class="panel-sub">Choose a target column, then rank features by mutual information and correlation.</p>
+
+      <div class="target-row">
+        <label for="targetSelect">Target column</label>
+        <select id="targetSelect"></select>
+        <button class="btn btn-stage" data-action="features">Rank features</button>
+      </div>
+      <div id="targetInfo" class="card-grid hidden"></div>
+      <div class="scope-card hidden" id="targetDistWrap"><canvas id="targetDistChart"></canvas></div>
+      <div class="rank-hint hidden" id="rankHint">Ranked by relevance to the target. Untick any feature to exclude it from training.</div>
+      <div id="featureRanking" class="rank-list hidden"></div>
+    </section>
+
+    <!-- ---------- TRAIN ---------- -->
+    <section class="panel" data-panel="train">
+      <h1 class="panel-title">05 / Train</h1>
+      <p class="panel-sub">Multiple models race head to head with cross-validation; the strongest one advances.</p>
+
+      <div class="model-picker">
+        <div class="model-picker-head">
+          <span>Models to race</span>
+          <span class="model-picker-actions">
+            <button class="btn-link" id="selectAllModelsBtn">select all</button>
+            <button class="btn-link" id="selectNoneModelsBtn">none</button>
+          </span>
+        </div>
+        <div id="modelChecklist" class="model-checklist"></div>
+      </div>
+
+      <button class="btn btn-stage" data-action="train">Train models</button>
+      <div id="leaderboard" class="leaderboard hidden"></div>
+      <div class="scope-card hidden" id="lbChartWrap"><canvas id="lbChart"></canvas></div>
+      <div id="trainMetrics" class="card-grid hidden"></div>
+      <div class="scope-card hidden" id="cmWrap">
+        <div class="scope-card-head"><span>Confusion matrix</span></div>
+        <div id="cmHeatmap"></div>
+      </div>
+      <div class="grid-2">
+        <div class="scope-card hidden" id="rocWrap">
+          <div class="scope-card-head"><span>ROC curve</span><span id="aucBadge"></span></div>
+          <canvas id="rocChart"></canvas>
+        </div>
+        <div class="scope-card hidden" id="classBalanceWrap">
+          <div class="scope-card-head"><span>Predicted vs actual class balance</span></div>
+          <canvas id="classBalanceChart"></canvas>
+        </div>
+      </div>
+      <div class="scope-card hidden" id="residWrap"><canvas id="residChart"></canvas></div>
+      <button class="btn btn-ghost btn-small hidden" id="downloadModelBtn">⇩ Download trained model (.joblib)</button>
+    </section>
+
+    <!-- ---------- EXPLAIN ---------- -->
+    <section class="panel" data-panel="explain">
+      <h1 class="panel-title">06 / Explain</h1>
+      <p class="panel-sub">A plain-language readout of what the model learned, generated locally from the results.</p>
+      <button class="btn btn-stage" data-action="explain">Generate explanation</button>
+      <div id="explainNarrative" class="narrative hidden"></div>
+      <div class="scope-card hidden" id="importanceWrap"><canvas id="importanceChart"></canvas></div>
+    </section>
+
+    <!-- ---------- PREDICT ---------- -->
+    <section class="panel" data-panel="predict">
+      <h1 class="panel-title">07 / Predict</h1>
+      <p class="panel-sub">Enter feature values and run them through the trained model to get a live prediction.</p>
+      <button class="btn btn-stage" data-action="predict">Load prediction form</button>
+      <form id="predictForm" class="predict-form hidden"></form>
+      <div id="predictResult" class="predict-result hidden"></div>
+    </section>
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="panel" data-panel="dashboard">
+      <h1 class="panel-title">08 / Dashboard</h1>
+      <p class="panel-sub">Everything the pipeline learned, in one readout.</p>
+      <button class="btn btn-stage" data-action="dashboard">Refresh dashboard</button>
+      <div id="dashboardContent"></div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
