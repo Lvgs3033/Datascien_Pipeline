@@ -1,5 +1,8 @@
-# Auto detect text files and perform LF normalization
-* text=auto
-*.html linguist-generated=true
-*.css linguist-generated=true
-*.js linguist-generated=true
+# Ignore frontend files
+*.html linguist-vendored
+*.css linguist-vendored
+*.js linguist-vendored
+
+# Ignore Flask folders
+static/** linguist-vendored
+templates/** linguist-vendored
