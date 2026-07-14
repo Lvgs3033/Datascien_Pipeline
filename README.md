@@ -76,29 +76,6 @@ autods/
     └── js/app.js           # pipeline controller, charts, heatmaps, predict form
 ```
 
-## API reference (for reuse/scripting)
-
-| Endpoint | Method | Purpose |
-|---|---|---|
-| `/api/upload` | POST (multipart) | Upload a CSV, field name `file` |
-| `/api/sample` | POST `{name}` | Load bundled sample: `iris`, `wine`, `diabetes` |
-| `/api/full_data?stage=raw\|clean` | GET | Full dataset rows (capped at 5000) for the scroll view |
-| `/api/clean` | POST | Run auto-cleaning on the loaded dataset |
-| `/api/eda` | POST | Compute stats, correlation, histograms, category counts |
-| `/api/target` | POST `{target}` | Set target column, detect task type, get distribution |
-| `/api/features` | POST | Rank & auto-select features against the target |
-| `/api/available_models?task_type=...` | GET | List every model available for a task type |
-| `/api/train` | POST `{features?, models?}` | Race selected models via 5-fold CV, fit the best one |
-| `/api/explain` | POST | Feature importances + generated plain-language narrative |
-| `/api/feature_meta` | GET | Per-feature type/range/options, used to build the predict form |
-| `/api/predict` | POST `{feature: value, ...}` | Run one row through the trained model |
-| `/api/download/cleaned_csv` | GET | Download the cleaned dataset |
-| `/api/download/model` | GET | Download the trained pipeline as `.joblib` |
-| `/api/dashboard` | GET | Combined payload for the summary dashboard |
-| `/api/reset` | POST | Clear the in-memory session |
-
-## Notes
-
 - All computation runs locally in-process; a single in-memory session holds the current dataset and trained model (fine for local/demo use — restart the server or click "Reset session" to start over).
 - Classification vs. regression is detected automatically from the target column's type/cardinality.
 - Feature selection uses `mutual_info_classif`/`mutual_info_regression` blended with absolute correlation; you can override the automatic picks before training.
