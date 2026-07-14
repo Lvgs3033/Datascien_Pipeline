@@ -1,5 +1,7 @@
 # AUTODS — Autonomous Data Scientist
 
+**Docker-Image** : docker pull dhvanik23/autods
+
 A self-contained web app that takes a raw CSV and automatically:
 
 1. **Cleans** the data — drops duplicates, empty/constant columns, likely ID columns, sequential row-index columns, and high-cardinality text columns; imputes missing values.
